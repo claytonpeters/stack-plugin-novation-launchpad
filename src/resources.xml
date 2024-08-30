@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/org/stack">
+	<file>ui/StackLaunchpadTrigger.ui</file>
+	<file>ui/StackLaunchpadGlobalSettings.ui</file>
+  </gresource>
+</gresources>

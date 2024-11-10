@@ -3,7 +3,7 @@
 #include "StackLog.h"
 #include "StackLaunchpadTrigger.h"
 #include "StackGtkHelper.h"
-#include <json/json.h>
+#include "StackJson.h"
 #include <list>
 #include "alsa/asoundlib.h"
 
@@ -833,8 +833,8 @@ char *stack_launchpad_trigger_to_json(StackTrigger *trigger)
 	trigger_root["on_pressed"] = launchpad_trigger->on_pressed;
 	trigger_root["use_for_cue_list"] = launchpad_trigger->use_for_cue_list;
 
-	Json::FastWriter writer;
-	return strdup(writer.write(trigger_root).c_str());
+	Json::StreamWriterBuilder builder;
+	return strdup(Json::writeString(builder, trigger_root).c_str());
 }
 
 void stack_launchpad_trigger_free_json(StackTrigger *trigger, char *json_data)
@@ -845,13 +845,12 @@ void stack_launchpad_trigger_free_json(StackTrigger *trigger, char *json_data)
 void stack_launchpad_trigger_from_json(StackTrigger *trigger, const char *json_data)
 {
 	Json::Value trigger_root;
-	Json::Reader reader;
 
 	// Call the superclass version
 	stack_trigger_from_json_base(trigger, json_data);
 
 	// Parse JSON data
-	reader.parse(json_data, json_data + strlen(json_data), trigger_root, false);
+	stack_json_read_string(json_data, &trigger_root);
 
 	// Get the data that's pertinent to us
 	Json::Value& trigger_data = trigger_root["StackLaunchpadTrigger"];
@@ -1266,8 +1265,8 @@ char *stack_launchpad_trigger_config_to_json()
 	stack_launchpad_trigger_json_populate_button(buttons["stop_all"], &global_buttons[GLOBAL_BUTTON_INDEX_STOP_ALL]);
 	config_root["global_buttons"] = buttons;
 
-	Json::FastWriter writer;
-	std::string output = writer.write(config_root);
+	Json::StreamWriterBuilder builder;
+	std::string output = Json::writeString(builder, config_root);
 	return strdup(output.c_str());
 }
 
@@ -1291,9 +1290,8 @@ static void stack_launchpad_trigger_populate_button_from_json(Json::Value &butto
 
 void stack_launchpad_trigger_config_from_json(const char *json_data)
 {
-	Json::Reader reader;
 	Json::Value config_root;
-	reader.parse(json_data, config_root);
+	stack_json_read_string(json_data, &config_root);
 
 	if (config_root.isMember("global_buttons"))
 	{
